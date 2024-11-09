@@ -6,6 +6,7 @@ import time
 import uuid
 
 import schedule
+import argparse
 
 JS_SERVICE_URL = 'http://127.0.0.1:13451'
 
@@ -203,9 +204,9 @@ def try_booking():
             attempt += 1
             print(f"Attempt {attempt} of {max_attempts}")
 
-            drId = '248' # 医生ID
-            startDate = '20241109' # 挂号开始时间
-            endDate = '20241231' # 挂号结束时间点
+            drId = '248'  # 医生ID
+            startDate = '20241109'  # 挂号开始时间
+            endDate = '20241231'  # 挂号结束时间点
 
             # Query available appointment times
             reg_points_data = regPoints(drId, startDate, endDate)
@@ -265,6 +266,13 @@ def job():
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='小程序抢号助手')
+    parser.add_argument('-type', type=int, help='启动方式, 1定时任务, 2立即运行一次', default=1)
+    args = parser.parse_args()
+    if args.type == 2:
+        job()
+        exit(0)
+
     # Schedule the job to run at 15:00 (3 PM) every day
     schedule.every().day.at("15:00").do(job)
 
@@ -273,4 +281,3 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         time.sleep(1)
-
