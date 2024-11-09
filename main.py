@@ -203,9 +203,9 @@ def try_booking():
             attempt += 1
             print(f"Attempt {attempt} of {max_attempts}")
 
-            drId = '248'
-            startDate = '20241109'
-            endDate = '20241231'
+            drId = '248' # 医生ID
+            startDate = '20241109' # 挂号开始时间
+            endDate = '20241231' # 挂号结束时间点
 
             # Query available appointment times
             reg_points_data = regPoints(drId, startDate, endDate)
