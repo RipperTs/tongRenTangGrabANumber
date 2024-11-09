@@ -8,7 +8,7 @@ import uuid
 import schedule
 import argparse
 
-JS_SERVICE_URL = 'http://127.0.0.1:13451'
+JS_SERVICE_URL = 'http://trt.qh.noteo.cn'
 
 OPENID = 'olIH15BXwyP3YdaKo1RiJEm3Yvbk'
 USERID = '420538'
