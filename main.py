@@ -11,6 +11,7 @@ JS_SERVICE_URL = 'http://127.0.0.1:13451'
 
 OPENID = 'olIH15BXwyP3YdaKo1RiJEm3Yvbk'
 USERID = '420538'
+USER_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MjA1MzgiLCJleHAiOjE3NjI2MDU3Mjd9.rKt8Alb-SeZcjrdZTiwN6NZanHMkHGwFPiMY9IcyUKM'
 
 
 def parameter_encryption(request_data):
@@ -58,7 +59,6 @@ def build_base_request(url, method, data):
     构建基础请求
     :return:
     """
-    token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MjA1MzgiLCJleHAiOjE3NjI2MDU3Mjd9.rKt8Alb-SeZcjrdZTiwN6NZanHMkHGwFPiMY9IcyUKM'
     userId = USERID
     signature, uuid_str = get_signature(data)
     requestData = parameter_encryption(data)
@@ -80,7 +80,7 @@ def build_base_request(url, method, data):
         'nonce': uuid_str,
         'signature': signature,
         'timestamp': str(int(time.time() * 1000)),
-        'token': token,
+        'token': USER_TOKEN,
         'userId': userId,
         'xweb_xhr': '1'
     }, timeout=30)
