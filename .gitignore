@@ -41,3 +41,4 @@ temp/
 build
 dist
 __pycache__
+qh.spec

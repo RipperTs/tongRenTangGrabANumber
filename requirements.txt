@@ -2,3 +2,4 @@ requests
 pyexecjs
 schedule
 python-dotenv
+pyinstaller

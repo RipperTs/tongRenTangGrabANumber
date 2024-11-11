@@ -8,6 +8,7 @@ import uuid
 import schedule
 import argparse
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -284,20 +285,52 @@ def job(drId, startDate, endDate):
     try_booking(drId, startDate, endDate)
 
 
-if __name__ == '__main__':
+def get_args():
+    if getattr(sys, 'frozen', False):
+        # 打包后的处理
+        args = []
+        try:
+            # 获取实际传入的参数
+            args = sys.argv[1:]
+        except Exception:
+            args = []
+    else:
+        # 开发环境下的参数
+        args = sys.argv[1:]
+
     parser = argparse.ArgumentParser(description='小程序抢号助手')
     parser.add_argument('-type', type=int, help='启动方式, 1定时任务, 2立即运行一次', default=2)
     parser.add_argument('-time', type=str, help='定时抢票时间点, 如15:00', default='15:00')
     parser.add_argument('-drid', type=int, help='医生ID', default=248)
     parser.add_argument('-startdate', type=int, help='挂号开始日期, 20241109', default='20241109')
     parser.add_argument('-enddate', type=int, help='挂号结束日期, 20241231', default='20241231')
-    args = parser.parse_args()
+
+    if '-h' in args or '--help' in args:
+        parser.print_help()
+        print("\n使用示例:")
+        print("1. 立即运行一次：")
+        print("   qh.exe -type 2 -drid 248 -startdate 20241109 -enddate 20241231")
+        print("\n2. 设置定时任务：")
+        print("   qh.exe -type 1 -time 15:00 -drid 248 -startdate 20241109 -enddate 20241231")
+        print("\n注意事项：")
+        print("- 时间格式必须是24小时制，例如：08:00、15:30")
+        print("- 日期格式必须是8位数字，例如：20241109")
+        print("- 定时任务模式下程序会持续运行，每天在指定时间执行")
+        print("- 立即运行模式下程序执行一次后就会退出")
+        sys.exit(0)
+
+    return parser.parse_args(args)
+
+
+if __name__ == '__main__':
+    args = get_args()
+
     if args.type == 2:
         job(args.drid, args.startdate, args.enddate)
-        exit(0)
+        sys.exit(0)
 
     # Schedule the job to run at 15:00 (3 PM) every day
-    schedule.every().day.at(args.time).do(job(args.drid, args.startdate, args.enddate))
+    schedule.every().day.at(args.time).do(job, args.drid, args.startdate, args.enddate)
 
     print("Scheduler started. Waiting for ...")
 
