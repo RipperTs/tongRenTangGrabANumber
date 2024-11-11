@@ -13,3 +13,8 @@ cd js && npm install && node index.js
 - 修改  `JS_SERVICE_URL` 为你的nodejs服务地址
 - 安装依赖 `pip install -r requirements.txt`
 - 执行 `python main.py`, 支持 `-type` 参数
+
+### 打包
+```shell
+pyinstaller -F main.py -n qh
+```
