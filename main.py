@@ -7,12 +7,17 @@ import uuid
 
 import schedule
 import argparse
+import os
 
-JS_SERVICE_URL = 'http://trt.qh.noteo.cn'
+from dotenv import load_dotenv
 
-OPENID = 'olIH15BXwyP3YdaKo1RiJEm3Yvbk'
-USERID = '420538'
-USER_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI0MjA1MzgiLCJleHAiOjE3NjI2MDU3Mjd9.rKt8Alb-SeZcjrdZTiwN6NZanHMkHGwFPiMY9IcyUKM'
+load_dotenv()
+
+JS_SERVICE_URL = os.environ.get("JS_SERVICE_URL", default="http://127.0.0.1:13451")
+
+OPENID = os.environ.get("QH_OPENID", default="")
+USERID = os.environ.get("QH_USERID", default="")
+USER_TOKEN = os.environ.get("QH_USER_TOKEN", default="")
 
 
 def parameter_encryption(request_data):
@@ -93,14 +98,14 @@ def build_base_request(url, method, data):
     return response.json()
 
 
-def regTargets():
+def regTargets(hisDeptId='0139'):
     """
     获取预约挂号列表
     :return:
     """
     url = 'https://zyyapp.tongrentangcare.com:10052/patient/v1/appoint/regTargets'
     request_data = {
-        "hisDeptId": "0139",
+        "hisDeptId": hisDeptId,
         "targetType": 1,
         "patientId": "",
         "pageSize": "9999",
@@ -195,7 +200,14 @@ def regHospPay(orderId, regId):
     return build_base_request(url, 'POST', request_data)
 
 
-def try_booking():
+def try_booking(drId, startDate, endDate):
+    """
+    开始尝试预约挂号
+    :param drId:
+    :param startDate:
+    :param endDate:
+    :return:
+    """
     max_attempts = 50
     attempt = 0
 
@@ -204,9 +216,9 @@ def try_booking():
             attempt += 1
             print(f"Attempt {attempt} of {max_attempts}")
 
-            drId = '248'  # 医生ID
-            startDate = '20241109'  # 挂号开始时间
-            endDate = '20241231'  # 挂号结束时间点
+            drId = drId  # 医生ID
+            startDate = startDate  # 挂号开始时间
+            endDate = endDate  # 挂号结束时间点
 
             # Query available appointment times
             reg_points_data = regPoints(drId, startDate, endDate)
@@ -259,22 +271,33 @@ def try_booking():
     return False
 
 
-def job():
+def job(drId, startDate, endDate):
+    """
+    执行任务
+    :param drId:
+    :param startDate:
+    :param endDate:
+    :return:
+    """
     current_time = datetime.now()
     print(f"Starting booking job at {current_time}")
-    try_booking()
+    try_booking(drId, startDate, endDate)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='小程序抢号助手')
-    parser.add_argument('-type', type=int, help='启动方式, 1定时任务, 2立即运行一次', default=1)
+    parser.add_argument('-type', type=int, help='启动方式, 1定时任务, 2立即运行一次', default=2)
+    parser.add_argument('-time', type=str, help='定时抢票时间点, 如15:00', default='15:00')
+    parser.add_argument('-drid', type=int, help='医生ID', default=248)
+    parser.add_argument('-startdate', type=int, help='挂号开始日期, 20241109', default='20241109')
+    parser.add_argument('-enddate', type=int, help='挂号结束日期, 20241231', default='20241231')
     args = parser.parse_args()
     if args.type == 2:
-        job()
+        job(args.drid, args.startdate, args.enddate)
         exit(0)
 
     # Schedule the job to run at 15:00 (3 PM) every day
-    schedule.every().day.at("15:00").do(job)
+    schedule.every().day.at(args.time).do(job(args.drid, args.startdate, args.enddate))
 
     print("Scheduler started. Waiting for ...")
 
