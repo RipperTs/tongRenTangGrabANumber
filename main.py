@@ -327,7 +327,7 @@ if __name__ == '__main__':
     args = get_args()
 
     if args.type == 2:
-        job(args.drid, args.startdate, args.enddate)
+        job(args.drid, args.startdate, args.enddate, args.maxattempts)
         sys.exit(0)
 
     schedule.every().day.at(args.time).do(job, args.drid, args.startdate, args.enddate, args.maxattempts)
