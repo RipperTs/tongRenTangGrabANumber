@@ -299,20 +299,16 @@ def get_args():
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser(description='小程序抢号助手')
-    parser.add_argument('-type', type=int, help='启动方式, 1定时任务, 2立即运行一次', default=2)
-    parser.add_argument('-time', type=str, help='定时抢票时间点, 如15:00', default='14:59:58')
-    parser.add_argument('-drid', type=int, help='医生ID', default=248)
+    parser.add_argument('-type', type=int, help='启动方式: 1定时任务, 2立即运行一次, 3查看当前支持的医生列表', default=2)
+    parser.add_argument('-time', type=str, help='定时抢票时间点, 如14:59:58', default='14:59:58')
+    parser.add_argument('-drid', type=int, help='医生ID, 如:248', default=248)
     parser.add_argument('-startdate', type=int, help='挂号开始日期, 20241109', default='20241109')
     parser.add_argument('-enddate', type=int, help='挂号结束日期, 20241231', default='20241231')
     parser.add_argument("-maxattempts", type=int, help="最大尝试次数", default=50)
 
     if '-h' in args or '--help' in args:
         parser.print_help()
-        print("\n使用示例:")
-        print("1. 立即运行一次：")
-        print("   qh.exe -type 2 -drid 248 -startdate 20241109 -enddate 20241231")
-        print("\n2. 设置定时任务：")
-        print("   qh.exe -type 1 -time 14:59:58 -drid 248 -startdate 20241109 -enddate 20241231")
+        print("\n如果不清楚医生ID, 使用 -type 3 查看当前支持的医生列表")
         print("\n注意事项：")
         print("- 时间格式必须是24小时制，例如：08:00:00、15:30:00")
         print("- 日期格式必须是8位数字，例如：20241109")
@@ -323,8 +319,26 @@ def get_args():
     return parser.parse_args(args)
 
 
+def printRegTargets():
+    """
+    打印预约挂号列表
+    :return:
+    """
+    reg_targets = regTargets()
+    if reg_targets.get('status') != 0:
+        print('获取数据失败')
+        return
+
+    print(f"医生名称 -------- 医生ID")
+    for item in reg_targets.get('data',{}).get('regTargets',[]):
+        print(f"{item.get('name')} -------- {item.get('targetId')}")
+
 if __name__ == '__main__':
     args = get_args()
+
+    if args.type == 3:
+        printRegTargets()
+        sys.exit(0)
 
     if args.type == 2:
         job(args.drid, args.startdate, args.enddate, args.maxattempts)
