@@ -310,6 +310,7 @@ def get_args():
         parser.print_help()
         print("\n如果不清楚医生ID, 使用 -type 3 查看当前支持的医生列表")
         print("\n注意事项：")
+        print("- 为了保证抢号成功, 请将患者列表中仅保留一位患者信息, 或者需要预约的患者信息在第一位")
         print("- 时间格式必须是24小时制，例如：08:00:00、15:30:00")
         print("- 日期格式必须是8位数字，例如：20241109")
         print("- 定时任务模式下程序会持续运行，每天在指定时间执行")
@@ -335,6 +336,8 @@ def printRegTargets():
 
 if __name__ == '__main__':
     args = get_args()
+
+    print(f"当前用户: {USERID} / {OPENID}")
 
     if args.type == 3:
         printRegTargets()
