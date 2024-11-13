@@ -201,21 +201,21 @@ def regHospPay(orderId, regId):
     return build_base_request(url, 'POST', request_data)
 
 
-def try_booking(drId, startDate, endDate):
+def try_booking(drId, startDate, endDate, maxattempts=50):
     """
     开始尝试预约挂号
     :param drId:
     :param startDate:
     :param endDate:
+    :param maxattempts:
     :return:
     """
-    max_attempts = 50
     attempt = 0
 
-    while attempt < max_attempts:
+    while attempt < maxattempts:
         try:
             attempt += 1
-            print(f"Attempt {attempt} of {max_attempts}")
+            print(f"Attempt {attempt} of {maxattempts}")
 
             drId = drId  # 医生ID
             startDate = startDate  # 挂号开始时间
@@ -272,7 +272,7 @@ def try_booking(drId, startDate, endDate):
     return False
 
 
-def job(drId, startDate, endDate):
+def job(drId, startDate, endDate, maxattempts=50):
     """
     执行任务
     :param drId:
@@ -282,7 +282,7 @@ def job(drId, startDate, endDate):
     """
     current_time = datetime.now()
     print(f"Starting booking job at {current_time}")
-    try_booking(drId, startDate, endDate)
+    try_booking(drId, startDate, endDate, maxattempts)
 
 
 def get_args():
@@ -300,10 +300,11 @@ def get_args():
 
     parser = argparse.ArgumentParser(description='小程序抢号助手')
     parser.add_argument('-type', type=int, help='启动方式, 1定时任务, 2立即运行一次', default=2)
-    parser.add_argument('-time', type=str, help='定时抢票时间点, 如15:00', default='15:00')
+    parser.add_argument('-time', type=str, help='定时抢票时间点, 如15:00', default='14:59:58')
     parser.add_argument('-drid', type=int, help='医生ID', default=248)
     parser.add_argument('-startdate', type=int, help='挂号开始日期, 20241109', default='20241109')
     parser.add_argument('-enddate', type=int, help='挂号结束日期, 20241231', default='20241231')
+    parser.add_argument("-maxattempts", type=int, help="最大尝试次数", default=50)
 
     if '-h' in args or '--help' in args:
         parser.print_help()
@@ -311,9 +312,9 @@ def get_args():
         print("1. 立即运行一次：")
         print("   qh.exe -type 2 -drid 248 -startdate 20241109 -enddate 20241231")
         print("\n2. 设置定时任务：")
-        print("   qh.exe -type 1 -time 15:00 -drid 248 -startdate 20241109 -enddate 20241231")
+        print("   qh.exe -type 1 -time 14:59:58 -drid 248 -startdate 20241109 -enddate 20241231")
         print("\n注意事项：")
-        print("- 时间格式必须是24小时制，例如：08:00、15:30")
+        print("- 时间格式必须是24小时制，例如：08:00:00、15:30:00")
         print("- 日期格式必须是8位数字，例如：20241109")
         print("- 定时任务模式下程序会持续运行，每天在指定时间执行")
         print("- 立即运行模式下程序执行一次后就会退出")
@@ -329,11 +330,10 @@ if __name__ == '__main__':
         job(args.drid, args.startdate, args.enddate)
         sys.exit(0)
 
-    # Schedule the job to run at 15:00 (3 PM) every day
-    schedule.every().day.at(args.time).do(job, args.drid, args.startdate, args.enddate)
+    schedule.every().day.at(args.time).do(job, args.drid, args.startdate, args.enddate, args.maxattempts)
 
-    print("Scheduler started. Waiting for ...")
+    print(f"Scheduler started. Waiting for {args.time}...")
 
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(0.1)  # 使用0.1秒间隔来提高精度
