@@ -223,7 +223,14 @@ def try_booking(drId, startDate, endDate, maxattempts=50):
 
             # Query available appointment times
             reg_points_data = regPoints(drId, startDate, endDate)
-            reg_points = list(reg_points_data['data']["regPoints"].values())[0]
+
+            reg_points = list(reg_points_data['data']["regPoints"].values())
+
+            if len(reg_points) == 0:
+                print('没有可预约的时间点')
+                continue
+
+            reg_points = reg_points[0]
 
             curr_reg_point = None
             for reg_point in reg_points:
@@ -233,7 +240,6 @@ def try_booking(drId, startDate, endDate, maxattempts=50):
 
             if curr_reg_point is None:
                 print('没有可预约的时间点')
-                time.sleep(1)  # Wait 1 second before next attempt
                 continue
 
             patients = queryPatients()
